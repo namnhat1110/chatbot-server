@@ -6,14 +6,18 @@ import { ChatController } from "@controllers/chat.controller";
 import { config } from "@utils/config";
 import { createChatRouter } from "@routes/chat.routes";
 import { connectDB } from "@database/connect";
+import { CacheService } from "@services/cache.service";
+import { apiLimiter } from "@utils/rateLimit";
 
 const app: Express = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
+app.use(apiLimiter);
 
 connectDB();
 
-const geminiService = new GeminiService(config.geminiApiKey);
+const cacheService = new CacheService();
+const geminiService = new GeminiService(config.geminiApiKey, cacheService);
 const messageService = new MessageService();
 const chatController = new ChatController(geminiService, messageService);
 
