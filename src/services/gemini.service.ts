@@ -1,4 +1,9 @@
-import { GenerativeModel, GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  GenerativeModel,
+  GoogleGenerativeAI,
+  HarmBlockThreshold,
+  HarmCategory,
+} from "@google/generative-ai";
 import { CacheService } from "@services/cache.service";
 
 export class GeminiService {
@@ -7,7 +12,19 @@ export class GeminiService {
 
   constructor(private apiKey: string, private cacheService: CacheService) {
     this.genAI = new GoogleGenerativeAI(this.apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    this.model = this.genAI.getGenerativeModel({
+      model: "gemini-pro",
+      safetySettings: [
+        {
+          threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+        },
+      ],
+    });
   }
 
   async generateResponse(prompt: string): Promise<string> {
